@@ -1,0 +1,86 @@
+<!doctype html><html lang="en-us"><head><meta charset="utf-8"/><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"><link rel="icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#000000"/><meta name="description" content="Web site created using create-react-app"/><link rel="apple-touch-icon" href="/logo192.png"/><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"><link rel="manifest" href="/manifest.json"/><title>Cokeverse</title><link rel="shortcut icon" href="TemplateData/favicon.ico"><link rel="stylesheet" href="TemplateData/style.css"><script src="./assets/DragonInterface.js"></script><script src="AgoraWebSDK/libs/databuilder.js"></script><script src="AgoraWebSDK/libs/clientmanager.js"></script><script src="AgoraWebSDK/libs/wglwrapper.js"></script><script src="AgoraWebSDK/libs/audioeffects.js"></script><script src="AgoraWebSDK/libs/eventmanager.js"></script><script src="AgoraWebSDK/libs/engineglobals.js"></script><script src="AgoraWebSDK/libs/watermark.js"></script><script src="AgoraWebSDK/libs/customvideo.js"></script><script src="AgoraWebSDK/libs/agorachannel.js"></script><script src="AgoraWebSDK/libs/multichannel.js"></script><script src="AgoraWebSDK/libs/audiosystem.js"></script><script src="AgoraWebSDK/libs/testing.js"></script><script src="AgoraWebSDK/libs/agorautils.js"></script><script src="AgoraWebSDK/libs/audiomixing.js"></script><script src="AgoraWebSDK/agorartcenginev2.js"></script><script src="AgoraWebSDK/vendor/materialize.min.js"></script><script src="AgoraRTC_N.js"></script><script src="AgoraWebSDK/vendor/jquery.min.js"></script><style>body,html{background:#000;width:100%;height:100%;overflow:visible;padding:0;margin:0}div#gameContainer{background:0 0!important;position:absolute}div#gameContainer canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}div#gameContainer canvas[data-pixel-art=true]{position:absolute;image-rendering:optimizeSpeed;image-rendering:-webkit-crisp-edges;image-rendering:-moz-crisp-edges;image-rendering:-o-crisp-edges;image-rendering:crisp-edges;image-rendering:-webkit-optimize-contrast;image-rendering:optimize-contrast;image-rendering:pixelated;-ms-interpolation-mode:nearest-neighbor}#root{position:absolute;top:0;left:0;background-color:transparent;pointer-events:none;font-family:Poppins;overflow:hidden;width:100%;height:100%;display:none}</style><link href="/static/css/2.23197e15.chunk.css" rel="stylesheet"><link href="/static/css/main.e32e8037.chunk.css" rel="stylesheet"></head><body><div id="gameContainer" class="unity-desktop"><canvas id="unity-canvas" data-pixel-art=""></canvas><div id="root"></div><div id="unity-mobile-warning">WebGL builds are not supported on mobile devices.</div></div><canvas id="inMem_Canvas" height="450" width="450" style="display:none"></canvas><canvas id="myCanvas" height="450" width="450" style="display:none"></canvas><div><div id="client-stats" class="stats"></div><div class="row video-group"><div class="col"><p id="local-player-name" class="player-name"></p><div class="player-with-stats"><div id="local-player" class="player"></div><div id="local-stats" class="stream-stats stats"></div></div></div><div class="w-100"></div><div class="col"><div id="remote-playerlist"></div></div></div></div><script src="Build/test_com_build.loader.js"></script><script>var unityInstance;
+    var mainCanvas = document.getElementById("myCanvas");
+    var mainContext = mainCanvas.getContext('2d');
+    var inMemCanvas = document.getElementById("inMem_Canvas");
+    var inMemContext = inMemCanvas.getContext('2d');
+    var canvasWidth = mainCanvas.width;
+    var canvasHeight = mainCanvas.height;
+    var angle = 0;
+
+    var buildUrl = "Build";
+    var loaderUrl = buildUrl + "/test_com_build.loader.js";
+    var config = {
+      dataUrl: "Build/test_com_build.data",
+      frameworkUrl: "Build/test_com_build.framework.js",
+      codeUrl: "Build/test_com_build.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Agora",
+      productName: "Cokeverse",
+      productVersion: "1.0",
+    };
+
+    var container = document.querySelector("#gameContainer");
+    var canvas = document.querySelector("#unity-canvas");
+    // var loadingBar = document.querySelector("#unity-loading-bar");
+    // var progressBarFull = document.querySelector("#unity-progress-bar-full");
+    // var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+    var mobileWarning = document.querySelector("#unity-mobile-warning");
+
+    var scaleToFit;
+    try {
+      scaleToFit = !!JSON.parse("");
+    } catch (e) {
+      scaleToFit = true;
+    }
+    function progressHandler(progress) {
+      var percent = progress * 100 + '%';
+      canvas.style.background = 'linear-gradient(to right, white, white ' + percent + ', transparent ' + percent + ', transparent) no-repeat center';
+      canvas.style.backgroundSize = '100% 1rem';
+    }
+
+    function remove_over() {
+      var root = document.getElementById('root');
+      root.style.display = 'block';
+    }
+
+    function onResize() {
+      var container = canvas.parentElement;
+      var w;
+      var h;
+
+      if (scaleToFit) {
+        w = window.innerWidth;
+        h = window.innerHeight;
+
+        var r = 720 / 1280;
+
+        if (w * r > window.innerHeight) {
+          w = Math.min(w, Math.ceil(h / r));
+        }
+        h = Math.floor(w * r);
+      } else {
+        w = 1280;
+        h = 720;
+      }
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        container.className = "unity-mobile";
+        config.devicePixelRatio = 1;
+        mobileWarning.style.display = "block";
+        setTimeout(() => {
+          mobileWarning.style.display = "none";
+        }, 5000);
+      } else {
+        container.style.width = canvas.style.width = w + "px";
+        container.style.height = canvas.style.height = h + "px";
+        container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
+        container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
+      }
+    }
+    createUnityInstance(canvas, config, progressHandler).then(function (instance) {
+      unityInstance = instance;
+      canvas = instance.Module.canvas;
+      onResize();
+    });
+    window.addEventListener('resize', onResize);
+    onResize();</script><script>!function(e){function r(r){for(var n,i,a=r[0],c=r[1],l=r[2],s=0,p=[];s<a.length;s++)i=a[s],Object.prototype.hasOwnProperty.call(o,i)&&o[i]&&p.push(o[i][0]),o[i]=0;for(n in c)Object.prototype.hasOwnProperty.call(c,n)&&(e[n]=c[n]);for(f&&f(r);p.length;)p.shift()();return u.push.apply(u,l||[]),t()}function t(){for(var e,r=0;r<u.length;r++){for(var t=u[r],n=!0,a=1;a<t.length;a++){var c=t[a];0!==o[c]&&(n=!1)}n&&(u.splice(r--,1),e=i(i.s=t[0]))}return e}var n={},o={1:0},u=[];function i(r){if(n[r])return n[r].exports;var t=n[r]={i:r,l:!1,exports:{}};return e[r].call(t.exports,t,t.exports,i),t.l=!0,t.exports}i.e=function(e){var r=[],t=o[e];if(0!==t)if(t)r.push(t[2]);else{var n=new Promise((function(r,n){t=o[e]=[r,n]}));r.push(t[2]=n);var u,a=document.createElement("script");a.charset="utf-8",a.timeout=120,i.nc&&a.setAttribute("nonce",i.nc),a.src=function(e){return i.p+"static/js/"+({}[e]||e)+"."+{3:"3e7c9c26"}[e]+".chunk.js"}(e);var c=new Error;u=function(r){a.onerror=a.onload=null,clearTimeout(l);var t=o[e];if(0!==t){if(t){var n=r&&("load"===r.type?"missing":r.type),u=r&&r.target&&r.target.src;c.message="Loading chunk "+e+" failed.\n("+n+": "+u+")",c.name="ChunkLoadError",c.type=n,c.request=u,t[1](c)}o[e]=void 0}};var l=setTimeout((function(){u({type:"timeout",target:a})}),12e4);a.onerror=a.onload=u,document.head.appendChild(a)}return Promise.all(r)},i.m=e,i.c=n,i.d=function(e,r,t){i.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:t})},i.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},i.t=function(e,r){if(1&r&&(e=i(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var t=Object.create(null);if(i.r(t),Object.defineProperty(t,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var n in e)i.d(t,n,function(r){return e[r]}.bind(null,n));return t},i.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return i.d(r,"a",r),r},i.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},i.p="/",i.oe=function(e){throw console.error(e),e};var a=this.webpackJsonpdemo=this.webpackJsonpdemo||[],c=a.push.bind(a);a.push=r,a=a.slice();for(var l=0;l<a.length;l++)r(a[l]);var f=c;t()}([])</script><script src="/static/js/2.dc8d12f2.chunk.js"></script><script src="/static/js/main.db93c5e5.chunk.js"></script></body></html>
